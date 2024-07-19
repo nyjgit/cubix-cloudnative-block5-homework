@@ -1,0 +1,37 @@
+# running the commands from the cubix-cloudnative-block5-homework directory
+
+
+
+# inserting "loggingMode: stdout-json" to jvm.yaml and native.yaml
+
+kubectl create ns cubix-hw5
+
+helm install jvm .\spring-cubix-hw5\ -n cubix-hw5 -f .\jvm.yaml
+    # checking logs at http://grafana.cubix.localhost:8080/explore?schemaVersion=1&panes=%7B%22SKu%22:%7B%22datasource%22:%22cubix_loki%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22%7Bnamespace%3D%5C%22cubix-hw5%5C%22,%20instance%3D%5C%22jvm%5C%22%7D%20%7C%20json%22,%22queryType%22:%22range%22,%22datasource%22:%7B%22type%22:%22loki%22,%22uid%22:%22cubix_loki%22%7D,%22editorMode%22:%22builder%22%7D%5D,%22range%22:%7B%22from%22:%22now-1h%22,%22to%22:%22now%22%7D%7D%7D&orgId=1
+helm uninstall jvm -n cubix-hw5
+
+helm install native .\spring-cubix-hw5\ -n cubix-hw5 -f .\native.yaml
+    # checking logs at http://grafana.cubix.localhost:8080/explore?schemaVersion=1&panes=%7B%22Czp%22:%7B%22datasource%22:%22cubix_loki%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22%7Bnamespace%3D%5C%22cubix-hw5%5C%22,%20instance%3D%5C%22native%5C%22%7D%20%7C%20json%22,%22queryType%22:%22range%22,%22datasource%22:%7B%22type%22:%22loki%22,%22uid%22:%22cubix_loki%22%7D,%22editorMode%22:%22builder%22%7D%5D,%22range%22:%7B%22from%22:%22now-1h%22,%22to%22:%22now%22%7D%7D%7D&orgId=1
+helm uninstall native -n cubix-hw5
+
+# choosing the Native deployment type because it starts up much faster (see choosing_deployment_type.png)
+
+
+helm install native .\spring-cubix-hw5\ -n cubix-hw5 -f .\native.yaml
+    # sending requests from Postman
+    # checking logs at http://grafana.cubix.localhost:8080/explore?schemaVersion=1&panes=%7B%22Czp%22:%7B%22datasource%22:%22cubix_loki%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22%7Bnamespace%3D%5C%22cubix-hw5%5C%22,%20instance%3D%5C%22native%5C%22%7D%20%7C%3D%20%60Request%20arrived%60%20%7C%20json%20%7C%20line_format%20%60%5Ct%7B%7B.message%7D%7D%20-%20%7B%7B.demo_name%7D%7D%60%22,%22queryType%22:%22range%22,%22datasource%22:%7B%22type%22:%22loki%22,%22uid%22:%22cubix_loki%22%7D,%22editorMode%22:%22builder%22%7D%5D,%22range%22:%7B%22from%22:%22now-30m%22,%22to%22:%22now%22%7D%7D%7D&orgId=1
+    # see filtering_request-related_logs.png
+helm uninstall native -n cubix-hw5
+
+
+# adding health checks to the deployment template
+
+helm install native .\spring-cubix-hw5\ -n cubix-hw5 -f .\native.yaml && kubectl get pods -n cubix-hw5 -w
+        # the pod is shown to be ready within a few seconds ✓
+        # the pod keeps running without restarting ✓, ^C
+    $POD_NAME = kubectl get pods -n cubix-hw5 -o jsonpath="{.items[0].metadata.name}"; kubectl describe pod/$POD_NAME -n cubix-hw5
+        # no failing probe ✓
+
+
+
+kubectl delete ns cubix-hw5
